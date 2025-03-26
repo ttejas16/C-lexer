@@ -4,7 +4,7 @@
 int main(void){
     Lexer lexer;
     // yet to handle other constructs :)
-    char *source = "void main(){  int a = 10 + 1;int b = a - 12; }";
+    char *source = "void main(){\tinta = 10 + 1;\r\nint b = a - 12; }";
     
     lexer_initialize(&lexer);
     lexer.source = source;

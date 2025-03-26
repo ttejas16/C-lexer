@@ -22,7 +22,8 @@ void lexer_initialize(Lexer *lexer)
 
 int is_seperator(char ch)
 {
-    return (ch == '{' || ch == '}' || ch == '(' || ch == ')' || ch == ',' || ch == ';');
+    return (ch == '{' || ch == '}' || ch == '(' || ch == ')' || 
+        ch == ',' || ch == ';' || ch == '\n' || ch == '\r');
 }
 
 
@@ -38,7 +39,7 @@ Token *create_token(Lexer *lexer, TokenType type, char *value) {
 
 Token* lexer_scan(Lexer *lexer)
 {
-    while (isspace(lexer_peek(lexer)))
+    while (isspace(lexer_peek(lexer)) || lexer_peek(lexer) == '\t')
     {
         lexer_advance(lexer);
     }
@@ -82,6 +83,15 @@ Token* lexer_scan(Lexer *lexer)
 
     case '=':
         token = create_token(lexer, TOKEN_EQUAL, "=");
+        break;
+
+    case '\n':
+        lexer->line++;
+        lexer_advance(lexer);
+        break;
+
+    case '\r':
+        lexer_advance(lexer);
         break;
 
     default:
