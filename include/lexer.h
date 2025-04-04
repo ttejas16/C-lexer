@@ -22,13 +22,15 @@ typedef enum {
     TOKEN_EOF
 } TokenType;
 
-typedef struct {
+typedef struct Token {
     TokenType type;
     char value[MAX_ID_LEN];
     size_t line;
+    struct Token *next;
 } Token;
 
 typedef struct {
+    Token *head;
     char *source;
     size_t line;
     size_t position;
@@ -37,4 +39,7 @@ typedef struct {
 Token* lexer_scan(Lexer *lexer);
 void lexer_initialize(Lexer *lexer);
 const char* get_token_name(TokenType type);
+void print_tokens(Lexer *lexer);
+void lexer_cleanup(Lexer *lexer);
+
 #endif
