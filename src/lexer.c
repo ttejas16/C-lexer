@@ -72,6 +72,50 @@ Token *create_token(Lexer *lexer, TokenType type, char *value) {
     return ptr;
 }
 
+Token *scan_alphabets(Lexer *lexer) {
+    char token_value[MAX_ID_LEN];
+    memset(token_value, '\0', MAX_ID_LEN);
+
+    size_t start = lexer->position;
+    while (!isspace(lexer_peek(lexer)) && !is_seperator(lexer_peek(lexer)) &&
+           isalpha(lexer_peek(lexer))) {
+        lexer_advance(lexer);
+    }
+
+    if (lexer->position - start > MAX_ID_LEN - 1) {
+        printf("error at line %lu at position %lu\n", lexer->line,
+               lexer->position);
+        printf("identifier length exceeds MAX_ID_LEN: %d\n", MAX_ID_LEN);
+        exit(EXIT_FAILURE);
+    }
+
+    strncpy(token_value, &lexer->source[start], lexer->position - start);
+    Token *token = create_token(lexer, TOKEN_IDENTIFIER, token_value);
+    return token;
+}
+
+Token *scan_numbers(Lexer *lexer) {
+    char token_value[MAX_ID_LEN];
+    memset(token_value, '\0', MAX_ID_LEN);
+
+    size_t start = lexer->position;
+    while (!isspace(lexer_peek(lexer)) && !is_seperator(lexer_peek(lexer)) &&
+           isdigit(lexer_peek(lexer))) {
+        lexer_advance(lexer);
+    }
+
+    if (lexer->position - start > MAX_ID_LEN - 1) {
+        printf("error at line %lu at position %lu\n", lexer->line,
+               lexer->position);
+        printf("identifier length exceeds MAX_ID_LEN: %d\n", MAX_ID_LEN);
+        exit(EXIT_FAILURE);
+    }
+
+    strncpy(token_value, &lexer->source[start], lexer->position - start);
+    Token *token = create_token(lexer, TOKEN_NUMBER_LITERAL , token_value);
+    return token;
+}
+
 Token *lexer_scan(Lexer *lexer) {
     while (isspace(lexer_peek(lexer)) || lexer_peek(lexer) == '\t') {
         lexer_advance(lexer);
@@ -117,6 +161,74 @@ Token *lexer_scan(Lexer *lexer) {
             token = create_token(lexer, TOKEN_EQUAL, "=");
             break;
 
+        case ':':
+            token = create_token(lexer, TOKEN_COLON, ":");
+            break;
+
+        case '*':
+            token = create_token(lexer, TOKEN_ASTERISK, "*");
+            break;
+
+        case '/':
+            token = create_token(lexer, TOKEN_FORWARDSLASH, "/");
+            break;
+
+        case '_':
+            token = create_token(lexer, TOKEN_UNDERSCORE, "_");
+            break;
+
+        case '|':
+            token = create_token(lexer, TOKEN_PIPE, "|");
+            break;
+
+        case '&':
+            token = create_token(lexer, TOKEN_AMPERSAND, "&");
+            break;
+
+        case '!':
+            token = create_token(lexer, TOKEN_EXCLAMATION, "!");
+            break;
+
+        case '#':
+            token = create_token(lexer, TOKEN_HASHTAG, "#");
+            break;
+
+        case '<':
+            token = create_token(lexer, TOKEN_L_ANGLE_BRACE, "<");
+            break;
+
+        case '>':
+            token = create_token(lexer, TOKEN_R_ANGLE_BRACE, ">");
+            break;
+
+        case '[':
+            token = create_token(lexer, TOKEN_L_SQUARE_BRACE, "[");
+            break;
+
+        case ']':
+            token = create_token(lexer, TOKEN_R_SQUARE_BRACE, "]");
+            break;
+
+        case '?':
+            token = create_token(lexer, TOKEN_QUESTIONMARK, "?");
+            break;
+
+        case '\"':
+            token = create_token(lexer, TOKEN_DOUBLE_QUOTE, "\"");
+            break;
+
+        case '\'':
+            token = create_token(lexer, TOKEN_SINGLE_QUOTE, "\'");
+            break;
+
+        case '%':
+            token = create_token(lexer, TOKEN_MODULO, "%");
+            break;
+
+        case '^':
+            token = create_token(lexer, TOKEN_XOR, "^");
+            break;
+
         case '\n':
             lexer->line++;
             lexer_advance(lexer);
@@ -130,28 +242,15 @@ Token *lexer_scan(Lexer *lexer) {
             break;
     }
 
-    if (token == NULL && isalnum(lexer_peek(lexer))) {
+    if (token == NULL && isalpha(lexer_peek(lexer))) {
         // printf("%d",MAX_ID_LEN);
-        char token_value[MAX_ID_LEN];
-        memset(token_value, '\0', MAX_ID_LEN);
-
-        size_t start = lexer->position;
-        while (!isspace(lexer_peek(lexer)) &&
-               !is_seperator(lexer_peek(lexer))) {
-            lexer_advance(lexer);
-        }
-
-        if (lexer->position - start > MAX_ID_LEN - 1) {
-            printf("error at line %lu at position %lu\n", lexer->line,
-                   lexer->position);
-            printf("identifier length exceeds MAX_ID_LEN: %d\n", MAX_ID_LEN);
-            exit(EXIT_FAILURE);
-        }
-
-        strncpy(token_value, &lexer->source[start], lexer->position - start);
-
-        token = create_token(lexer, TOKEN_IDENTIFIER, token_value);
-    } else if (token == NULL) {
+        token = scan_alphabets(lexer);
+    } 
+    else if (token == NULL && isdigit(lexer_peek(lexer)))
+    {
+        token = scan_numbers(lexer);
+    }
+    else if (token == NULL) {
         token = create_token(lexer, TOKEN_EOF, "");
         lexer_advance(lexer);
     } else {
@@ -163,38 +262,109 @@ Token *lexer_scan(Lexer *lexer) {
     return token;
 }
 
+
+
 const char *get_token_name(TokenType type) {
     switch (type) {
         case TOKEN_IDENTIFIER:
             return "TOKEN_IDENTIFIER";
+
         case TOKEN_KEYWORD:
             return "TOKEN_KEYWORD";
+
         case TOKEN_IF:
             return "TOKEN_IF";
+
         case TOKEN_ELSE:
             return "TOKEN_ELSE";
+
         case TOKEN_RETURN:
             return "TOKEN_RETURN";
+
         case TOKEN_INVALID:
             return "TOKEN_INVALID";
+
         case TOKEN_COMMA:
             return "TOKEN_COMMA";
+
         case TOKEN_SEMICOLON:
             return "TOKEN_SEMICOLON";
+
         case TOKEN_L_CURLY_BRACE:
             return "TOKEN_L_CURLY_BRACE";
+
         case TOKEN_R_CURLY_BRACE:
             return "TOKEN_R_CURLY_BRACE";
+
         case TOKEN_L_BRACE:
             return "TOKEN_L_BRACE";
+
         case TOKEN_R_BRACE:
             return "TOKEN_R_BRACE";
+
         case TOKEN_PLUS:
             return "TOKEN_PLUS";
+
         case TOKEN_MINUS:
             return "TOKEN_MINUS";
+
         case TOKEN_EQUAL:
             return "TOKEN_EQUAL";
+
+        case TOKEN_COLON:
+            return "TOKEN_COLON";
+
+        case TOKEN_ASTERISK:
+            return "TOKEN_ASTERISK";
+
+        case TOKEN_FORWARDSLASH:
+            return "TOKEN_FORWARDSLASH";
+
+        case TOKEN_UNDERSCORE:
+            return "TOKEN_UNDERSCORE";
+
+        case TOKEN_PIPE:
+            return "TOKEN_PIPE";
+
+        case TOKEN_AMPERSAND:
+            return "TOKEN_AMPERSAND";
+
+        case TOKEN_EXCLAMATION:
+            return "TOKEN_EXCLAMATION";
+
+        case TOKEN_HASHTAG:
+            return "TOKEN_HASHTAG";
+
+        case TOKEN_L_ANGLE_BRACE:
+            return "TOKEN_L_ANGLE_BRACE";
+
+        case TOKEN_R_ANGLE_BRACE:
+            return "TOKEN_R_ANGLE_BRACE";
+
+        case TOKEN_L_SQUARE_BRACE:
+            return "TOKEN_L_SQUARE_BRACE";
+
+        case TOKEN_R_SQUARE_BRACE:
+            return "TOKEN_R_SQUARE_BRACE";
+
+        case TOKEN_QUESTIONMARK:
+            return "TOKEN_QUESTIONMARK";
+
+        case TOKEN_DOUBLE_QUOTE:
+            return "TOKEN_DOUBLE_QUOTE";
+
+        case TOKEN_SINGLE_QUOTE:
+            return "TOKEN_SINGLE_QUOTE";
+
+        case TOKEN_MODULO:
+            return "TOKEN_MODULO";
+
+        case TOKEN_XOR:
+            return "TOKEN_XOR";
+
+        case TOKEN_NUMBER_LITERAL:
+            return "TOKEN_NUMBER_LITERAL";
+
         case TOKEN_EOF:
             return "TOKEN_EOF";
 
