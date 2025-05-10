@@ -1,9 +1,30 @@
 #include "lexer.h"
+#include "hash_map.h"
 
 #include <ctype.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+
+Hash_map keyword_map;
+
+char *keywords[] = {
+    // c constructs
+    "if", 
+    "else",
+    "for",
+    "while",
+    "do",
+    "return",
+    // datatypes
+    "struct",
+    "int",
+    "void",
+    "char",
+    "long",
+    NULL
+};
+
 
 static char lexer_advance(Lexer *lexer) {
     return lexer->source[lexer->position++];
@@ -12,6 +33,9 @@ static char lexer_advance(Lexer *lexer) {
 static char lexer_peek(Lexer *lexer) { return lexer->source[lexer->position]; }
 
 void lexer_initialize(Lexer *lexer) {
+    // init the keyword map as well
+    hash_map_initialize(&keyword_map);
+
     lexer->line = 1;
     lexer->position = 0;
     lexer->head = NULL;
