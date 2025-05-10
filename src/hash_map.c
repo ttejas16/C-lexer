@@ -6,7 +6,7 @@
 
 #include "lexer.h"
 
-void print_map(Hash_map *map) {
+static void print_map(Hash_map *map) {
     for (int i = 0; i < MAX_BUCKET_CAPACITY; i++) {
         if (map->buckets[i]) {
             printf("%lu, %s, %d", map->buckets[i]->hash, map->buckets[i]->key,
@@ -86,4 +86,22 @@ int map_has(Hash_map *map, char *key) {
     }
 
     return 0;
+}
+
+void map_free(Hash_map *map) {
+    for (int i = 0; i < MAX_BUCKET_CAPACITY; i++) {
+        if (map->buckets[i]) {
+            Map_item *slow = map->buckets[i];
+            Map_item *fast = slow->next;
+
+            while (slow) {
+                free(slow);
+                slow = fast;
+
+                if (fast) {
+                    fast = fast->next;
+                }
+            }
+        }
+    }
 }

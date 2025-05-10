@@ -19,5 +19,6 @@ int map_put(Hash_map *map, char *key);
 // Map_item *map_get(char *key);
 int map_has(Hash_map *map, char *key);
 unsigned long hash(char *key);
+void map_free(Hash_map *map);
 
 #endif

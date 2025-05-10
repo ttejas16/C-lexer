@@ -6,6 +6,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+// define global keyword map instead of passing it to every lexer function
 Hash_map keyword_map;
 
 char *keywords[] = {
@@ -74,6 +75,9 @@ void lexer_cleanup(Lexer *lexer) {
             fast = fast->next;
         }
     }
+
+    // free keyword map as well
+    map_free(&keyword_map);
 }
 
 Token *create_token(Lexer *lexer, TokenType type, char *value) {
