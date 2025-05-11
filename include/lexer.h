@@ -2,6 +2,7 @@
 #define _LEXER_
 #define MAX_ID_LEN 256
 #include <stdlib.h>
+
 #include "hash_map.h"
 
 typedef enum {
@@ -49,7 +50,7 @@ typedef struct Token {
 } Token;
 
 typedef struct {
-    Token *head;
+    Token *head, *tail;
     char *source;
     size_t line;
     size_t position;
@@ -58,9 +59,9 @@ typedef struct {
 extern char *keywords[];
 extern Hash_map keyword_map;
 
-Token* lexer_scan(Lexer *lexer);
+Token *lexer_scan(Lexer *lexer);
 void lexer_initialize(Lexer *lexer);
-const char* get_token_name(TokenType type);
+const char *get_token_name(TokenType type);
 void print_tokens(Lexer *lexer);
 void lexer_cleanup(Lexer *lexer);
 
