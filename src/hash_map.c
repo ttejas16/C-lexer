@@ -9,9 +9,13 @@
 static void print_map(Hash_map *map) {
     for (int i = 0; i < MAX_BUCKET_CAPACITY; i++) {
         if (map->buckets[i]) {
-            printf("%lu, %s, %d", map->buckets[i]->hash, map->buckets[i]->key,
-                   i);
-            printf("\n");
+            Map_item *current = map->buckets[i];
+
+            while (current) {
+                printf("%lu, %s, %d", current->hash, current->key, i);
+                printf("\n");
+                current = current->next;
+            }
         }
     }
 }
