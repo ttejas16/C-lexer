@@ -37,4 +37,4 @@ clean:
 # Run the compiled program
 run: all
 	@echo "Running file '$(TARGET)'\n"
-	@$(TARGET)
+	@$(TARGET) $(arg)

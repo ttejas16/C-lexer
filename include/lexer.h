@@ -65,5 +65,6 @@ void lexer_initialize(Lexer *lexer);
 const char *get_token_name(TokenType type);
 void print_tokens(Lexer *lexer);
 void lexer_cleanup(Lexer *lexer);
+char lexer_peek(Lexer *lexer);
 
 #endif

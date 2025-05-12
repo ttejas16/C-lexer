@@ -48,7 +48,7 @@ static char lexer_advance(Lexer *lexer) {
     return lexer->source[lexer->position++];
 }
 
-static char lexer_peek(Lexer *lexer) { return lexer->source[lexer->position]; }
+char lexer_peek(Lexer *lexer) { return lexer->source[lexer->position]; }
 
 void lexer_initialize(Lexer *lexer) {
     // init the keyword map as well
@@ -298,6 +298,10 @@ Token *lexer_scan(Lexer *lexer) {
             lexer_advance(lexer);
             break;
 
+        case '\0':
+            // hit end of line
+            return NULL;
+
         default:
             break;
     }
@@ -340,7 +344,7 @@ Token *lexer_scan(Lexer *lexer) {
         token = scan_numbers(lexer);
     }
     else if (token == NULL) {
-        token = create_token(lexer, TOKEN_EOF, "");
+        token = create_token(lexer, TOKEN_INVALID, "");
         lexer_advance(lexer);
     } else {
         lexer_advance(lexer);
