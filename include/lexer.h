@@ -39,6 +39,7 @@ typedef enum {
     TOKEN_MODULO,
     TOKEN_XOR,
     TOKEN_NUMBER_LITERAL,
+    TOKEN_STRING_LITERAL,
     TOKEN_EOF
 } TokenType;
 

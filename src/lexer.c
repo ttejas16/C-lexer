@@ -48,6 +48,10 @@ int is_seperator(char ch) {
             ch == ';' || ch == '\n' || ch == '\r');
 }
 
+int is_terminating(char ch){
+    return (ch == EOF || ch == '\0');
+}
+
 void print_tokens(Lexer *lexer) {
     Token *current = lexer->head;
 
@@ -112,7 +116,7 @@ Token *scan_alphabets(Lexer *lexer) {
 
     size_t start = lexer->position;
     while (!isspace(lexer_peek(lexer)) && !is_seperator(lexer_peek(lexer)) &&
-           isalpha(lexer_peek(lexer))) {
+           !is_terminating(lexer_peek(lexer)) && isalpha(lexer_peek(lexer))) {
         lexer_advance(lexer);
     }
 
@@ -134,7 +138,7 @@ Token *scan_numbers(Lexer *lexer) {
 
     size_t start = lexer->position;
     while (!isspace(lexer_peek(lexer)) && !is_seperator(lexer_peek(lexer)) &&
-           isdigit(lexer_peek(lexer))) {
+           !is_terminating(lexer_peek(lexer)) && isdigit(lexer_peek(lexer))) {
         lexer_advance(lexer);
     }
 
@@ -276,12 +280,43 @@ Token *lexer_scan(Lexer *lexer) {
             break;
     }
 
-    if (token == NULL && isalpha(lexer_peek(lexer))) {
+    // check if the token scanned was a double quote if yes
+    // scan until the next double quote appears or EOF or \0 appears
+    if (token && token->type == TOKEN_DOUBLE_QUOTE)
+    {
+        lexer_advance(lexer); // move one character ahead first
+
+        char token_value[MAX_ID_LEN];
+        memset(token_value, '\0', MAX_ID_LEN);
+
+        size_t start = lexer->position;
+        while (lexer_peek(lexer) != '\"' && !is_terminating(lexer_peek(lexer)))
+        {
+            // printf("%c", lexer_peek(lexer));
+            lexer_advance(lexer);
+        }
+        // printf("\n");
+        
+        strncpy(token_value, &lexer->source[start], lexer->position - start);
+        
+        // scan string literal but dont update the current token
+        create_token(lexer, TOKEN_STRING_LITERAL, token_value);
+
+        if (is_terminating(lexer_peek(lexer)))
+        {
+            fprintf(stderr, "%s", "missing terminating \" character\n");
+            exit(EXIT_FAILURE);
+        }
+        else{
+            token = create_token(lexer, TOKEN_DOUBLE_QUOTE, "\"");
+        }
+        lexer_advance(lexer);
+    }
+    else if (token == NULL && isalpha(lexer_peek(lexer))) {
         // printf("%d",MAX_ID_LEN);
         token = scan_alphabets(lexer);
     } 
-    else if (token == NULL && isdigit(lexer_peek(lexer)))
-    {
+    else if (token == NULL && isdigit(lexer_peek(lexer))) {
         token = scan_numbers(lexer);
     }
     else if (token == NULL) {
@@ -398,6 +433,9 @@ const char *get_token_name(TokenType type) {
 
         case TOKEN_NUMBER_LITERAL:
             return "TOKEN_NUMBER_LITERAL";
+
+        case TOKEN_STRING_LITERAL:
+            return "TOKEN_STRING_LITERAL";
 
         case TOKEN_EOF:
             return "TOKEN_EOF";

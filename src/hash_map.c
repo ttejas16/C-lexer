@@ -28,7 +28,7 @@ void hash_map_initialize(Hash_map *map) {
         map_put(map, *current);
         current++;
     }
-    print_map(map);
+    // print_map(map);
 }
 
 size_t hash(char *key) {
