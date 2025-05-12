@@ -17,12 +17,29 @@ char *keywords[] = {
     "while",
     "do",
     "return",
+    "include",
+    "static",
+    "extern",
+    "typedef",
+    "unsigned",
+    "signed",
+    "switch",
+    "enum",
+    "break",
+    "case",
+    "const",
+    "continue"
+    "sizeof"
     // datatypes
     "struct",
     "int",
-    "void",
     "char",
+    "void",
     "long",
+    "double",
+    "float",
+    "short",
+    "union", 
     NULL
 };
 
@@ -128,8 +145,13 @@ Token *scan_alphabets(Lexer *lexer) {
     }
 
     strncpy(token_value, &lexer->source[start], lexer->position - start);
-    Token *token = create_token(lexer, TOKEN_IDENTIFIER, token_value);
-    return token;
+
+    if (map_has(&keyword_map, token_value) == 1)
+    {
+        return create_token(lexer, TOKEN_KEYWORD, token_value);
+    }
+    
+    return create_token(lexer, TOKEN_IDENTIFIER, token_value);
 }
 
 Token *scan_numbers(Lexer *lexer) {
@@ -292,10 +314,8 @@ Token *lexer_scan(Lexer *lexer) {
         size_t start = lexer->position;
         while (lexer_peek(lexer) != '\"' && !is_terminating(lexer_peek(lexer)))
         {
-            // printf("%c", lexer_peek(lexer));
             lexer_advance(lexer);
         }
-        // printf("\n");
         
         strncpy(token_value, &lexer->source[start], lexer->position - start);
         
@@ -326,8 +346,6 @@ Token *lexer_scan(Lexer *lexer) {
         lexer_advance(lexer);
     }
 
-    // printf("Found Id [%s] at %lu at line %lu", token_value, start,
-    // lexer->line);
     return token;
 }
 
