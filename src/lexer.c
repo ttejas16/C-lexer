@@ -72,13 +72,53 @@ int is_terminating(char ch){
 void print_tokens(Lexer *lexer) {
     Token *current = lexer->head;
 
+    int first_break_point = 40;
+    int second_break_point = 80;
+    
+    int chars_printed = 0;
     while (current) {
-        printf("%s \x1B[34m'%s'\n", get_token_name(current->type),
-               current->value);
-        printf("\x1B[37m");
+
+        int token_len = strlen(get_token_name(current->type));
+        int token_value_len = strlen(current->value);
+        int total_len = token_len + token_value_len + 4;
+
+        if (total_len < first_break_point) {
+            int padding_len = first_break_point - total_len;
+            chars_printed += first_break_point;
+
+            printf("%s \x1B[34m'%s'", get_token_name(current->type), current->value);
+            printf("\x1B[37m");
+            printf("%-*s", padding_len, "");
+        }
+        else if(total_len >= first_break_point && total_len <= second_break_point) {
+            int padding_len = second_break_point - total_len;
+            chars_printed += second_break_point;
+
+            printf("%s \x1B[34m'%s'", get_token_name(current->type), current->value);
+            printf("\x1B[37m");
+            printf("%-*s", padding_len, "");
+        }
+        else {
+            if (chars_printed > 0) {
+                printf("\n%s \x1B[34m'%s'", get_token_name(current->type), current->value);
+                printf("\x1B[37m\n");
+            }
+            else {
+                printf("%s \x1B[34m'%s'", get_token_name(current->type), current->value);
+                printf("\x1B[37m\n");
+            }
+
+            chars_printed = 0;
+        }
+        
+        if (chars_printed > second_break_point) {
+            chars_printed = 0;
+            printf("\n");
+        }
 
         current = current->next;
     }
+    printf("\n");
 }
 
 void lexer_cleanup(Lexer *lexer) {
