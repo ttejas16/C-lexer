@@ -244,6 +244,10 @@ Token *lexer_scan(Lexer *lexer) {
         case ',':
             token = create_token(lexer, TOKEN_COMMA, ",");
             break;
+        
+        case '.':
+            token = create_token(lexer, TOKEN_DOT, ".");
+            break;
 
         case '+':
             token = create_token(lexer, TOKEN_PLUS, "+");
@@ -399,20 +403,14 @@ const char *get_token_name(TokenType type) {
         case TOKEN_KEYWORD:
             return "TOKEN_KEYWORD";
 
-        case TOKEN_IF:
-            return "TOKEN_IF";
-
-        case TOKEN_ELSE:
-            return "TOKEN_ELSE";
-
-        case TOKEN_RETURN:
-            return "TOKEN_RETURN";
-
         case TOKEN_INVALID:
             return "TOKEN_INVALID";
 
         case TOKEN_COMMA:
             return "TOKEN_COMMA";
+        
+        case TOKEN_DOT:
+            return "TOKEN_DOT";
 
         case TOKEN_SEMICOLON:
             return "TOKEN_SEMICOLON";
@@ -499,6 +497,6 @@ const char *get_token_name(TokenType type) {
             return "TOKEN_EOF";
 
         default:
-            return "UNKNOWN";
+            return "TOKEN_INVALID";
     }
 }
