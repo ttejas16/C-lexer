@@ -57,7 +57,6 @@ void lexer_initialize(Lexer *lexer) {
     lexer->line = 1;
     lexer->position = 0;
     lexer->head = NULL;
-    lexer->tail = NULL;
 }
 
 int is_seperator(char ch) {
@@ -139,7 +138,6 @@ void lexer_cleanup(Lexer *lexer) {
     }
 
     lexer->head = NULL;
-    lexer->tail = NULL;
 
     // free keyword map as well
     map_free(&keyword_map);
@@ -162,8 +160,6 @@ Token *create_token(Lexer *lexer, TokenType type, char *value) {
         current_token = ptr;
     }
     
-    lexer->tail = current_token;
-
     return ptr;
 }
 

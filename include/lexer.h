@@ -51,7 +51,7 @@ typedef struct Token {
 } Token;
 
 typedef struct {
-    Token *head, *tail;
+    Token *head;
     char *source;
     size_t line;
     size_t position;
