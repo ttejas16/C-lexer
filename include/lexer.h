@@ -44,14 +44,14 @@ typedef enum {
 typedef struct Token {
     TokenType type;
     char value[MAX_ID_LEN];
-    size_t line;
+    size_t line, col;
     struct Token *next;
 } Token;
 
 typedef struct {
     Token *head;
     char *source;
-    size_t line;
+    size_t line, col;
     size_t position;
 } Lexer;
 

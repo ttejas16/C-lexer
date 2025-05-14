@@ -35,6 +35,9 @@ int main(int argc, char **argv) {
         }
 
         lexer.position = 0;
+        lexer.col = 1;
+        lexer.line++;
+
         memset(buffer, '\0', BUFFER_LEN);
         res = fgets(buffer, BUFFER_LEN, fp);
     }

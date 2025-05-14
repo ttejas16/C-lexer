@@ -45,6 +45,7 @@ char *keywords[] = {
 
 
 static char lexer_advance(Lexer *lexer) {
+    lexer->col++;
     return lexer->source[lexer->position++];
 }
 
@@ -55,6 +56,7 @@ void lexer_initialize(Lexer *lexer) {
     hash_map_initialize(&keyword_map);
 
     lexer->line = 1;
+    lexer->col = 1;
     lexer->position = 0;
     lexer->head = NULL;
 }
@@ -68,25 +70,54 @@ int is_terminating(char ch){
     return (ch == EOF || ch == '\0');
 }
 
+size_t get_token_length(Token *token) {
+    if (!token) return 0;
+
+    int result = 0;
+    result += strlen(get_token_name(token->type));
+    result += strlen(token->value);
+    
+    // to count digits in line number 
+    int l = token->line;
+    int l_count = 0;
+    while (l)
+    {
+        l_count++;
+        l = l / 10;
+
+    }
+    // to count digits in col number 
+    int c = token->col;
+    int c_count = 0;
+    while (c)
+    {
+        c_count++;
+        c = c / 10;
+    }
+
+    result += (l_count + c_count);
+
+    // for extra characters like spaces and , and 5 for Ln and Col
+    result += 14;
+    return result;
+}
+
 void print_tokens(Lexer *lexer) {
     Token *current = lexer->head;
 
-    int first_break_point = 40;
-    int second_break_point = 80;
+    int first_break_point = 50;
+    int second_break_point = 100;
     
     int chars_printed = 0;
     while (current) {
-
-        int token_len = strlen(get_token_name(current->type));
-        int token_value_len = strlen(current->value);
-        int total_len = token_len + token_value_len + 4;
+        int total_len = get_token_length(current);
 
         if (total_len < first_break_point) {
             int padding_len = first_break_point - total_len;
             chars_printed += first_break_point;
 
             printf("%s \x1B[34m'%s'", get_token_name(current->type), current->value);
-            printf("\x1B[37m");
+            printf("\x1B[37m Ln %lu, Col %lu", current->line, current->col);
             printf("%-*s", padding_len, "");
         }
         else if(total_len >= first_break_point && total_len <= second_break_point) {
@@ -94,17 +125,17 @@ void print_tokens(Lexer *lexer) {
             chars_printed += second_break_point;
 
             printf("%s \x1B[34m'%s'", get_token_name(current->type), current->value);
-            printf("\x1B[37m");
+            printf("\x1B[37m Ln %lu, Col %lu", current->line, current->col);
             printf("%-*s", padding_len, "");
         }
         else {
             if (chars_printed > 0) {
                 printf("\n%s \x1B[34m'%s'", get_token_name(current->type), current->value);
-                printf("\x1B[37m\n");
+                printf("\x1B[37m Ln %lu, Col %lu\n", current->line, current->col);
             }
             else {
                 printf("%s \x1B[34m'%s'", get_token_name(current->type), current->value);
-                printf("\x1B[37m\n");
+                printf("\x1B[37m Ln %lu, Col %lu", current->line, current->col);
             }
 
             chars_printed = 0;
@@ -117,7 +148,12 @@ void print_tokens(Lexer *lexer) {
 
         current = current->next;
     }
-    printf("\n");
+
+    if (fgetc(stdout) != '\n')
+    {
+        printf("\n");
+    }
+    
 }
 
 void lexer_cleanup(Lexer *lexer) {
@@ -148,6 +184,23 @@ Token *create_token(Lexer *lexer, TokenType type, char *value) {
     Token *ptr = (Token *)malloc(sizeof(Token));
 
     ptr->line = lexer->line;
+    
+    // this is because scanning these tokens advances lexer position therefore its
+    // column position
+    switch (type)
+    {
+    case TOKEN_IDENTIFIER:
+    case TOKEN_STRING_LITERAL:
+    case TOKEN_NUMBER_LITERAL:
+    case TOKEN_KEYWORD:
+        ptr->col = lexer->col - strlen(value);
+        break;
+    
+    default:
+        ptr->col = lexer->col;
+        break;
+    }
+
     ptr->type = type;
     ptr->next = NULL;
     strncpy(ptr->value, value, MAX_ID_LEN);
@@ -331,6 +384,7 @@ Token *lexer_scan(Lexer *lexer) {
 
         case '\n':
             lexer->line++;
+            lexer->col = 1;
             lexer_advance(lexer);
             break;
 
