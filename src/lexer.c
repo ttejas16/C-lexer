@@ -191,6 +191,7 @@ Token *create_token(Lexer *lexer, TokenType type, char *value) {
     {
     case TOKEN_IDENTIFIER:
     case TOKEN_STRING_LITERAL:
+    case TOKEN_CHAR_LITERAL:
     case TOKEN_NUMBER_LITERAL:
     case TOKEN_KEYWORD:
         ptr->col = lexer->col - strlen(value);
@@ -418,11 +419,13 @@ Token *lexer_scan(Lexer *lexer) {
         strncpy(token_value, &lexer->source[start], lexer->position - start);
         
         // scan string literal but dont update the current token
-        create_token(lexer, TOKEN_STRING_LITERAL, token_value);
+        Token *string_literal_token = create_token(lexer, TOKEN_STRING_LITERAL, token_value);
 
         if (is_terminating(lexer_peek(lexer)))
         {
-            fprintf(stderr, "%s", "missing terminating \" character\n");
+            fprintf(stderr,
+                    "missing terminating \" character for string literal at Ln %lu, Col %lu\n", 
+                    string_literal_token->line, string_literal_token->col);
             exit(EXIT_FAILURE);
         }
         else{
@@ -430,6 +433,46 @@ Token *lexer_scan(Lexer *lexer) {
         }
         lexer_advance(lexer);
     }
+    else if (token && token->type == TOKEN_SINGLE_QUOTE)
+    {
+        // this part is same as that for string literal but we just
+        // check for a ' and we check if length of literal is more than 1 and report an error
+        lexer_advance(lexer);
+
+        char token_value[MAX_ID_LEN];
+        memset(token_value, '\0', MAX_ID_LEN);
+
+        size_t start = lexer->position;
+        while (lexer_peek(lexer) != '\'' && !is_terminating(lexer_peek(lexer)))
+        {
+            lexer_advance(lexer);
+        }
+
+        strncpy(token_value, &lexer->source[start], lexer->position - start);
+        
+        Token *char_literal_token = create_token(lexer, TOKEN_CHAR_LITERAL, token_value);
+
+        if (is_terminating(lexer_peek(lexer)))
+        {
+            fprintf(stderr,
+                    "missing terminating \' character for char literal at Ln %lu, Col %lu\n", 
+                    char_literal_token->line, char_literal_token->col);
+            exit(EXIT_FAILURE);
+        }
+        else if (strlen(token_value) > 1)
+        {
+            fprintf(stderr, 
+                    "multi-character character literal at Ln %lu, Col %lu \n",
+                    char_literal_token->line, char_literal_token->col);
+            exit(EXIT_FAILURE);
+        }
+        else{
+            token = create_token(lexer, TOKEN_SINGLE_QUOTE, "\'");
+        }
+        lexer_advance(lexer);
+
+    }
+    
     else if (token == NULL && isalpha(lexer_peek(lexer))) {
         // printf("%d",MAX_ID_LEN);
         token = scan_alphabets(lexer);
@@ -546,6 +589,9 @@ const char *get_token_name(TokenType type) {
 
         case TOKEN_STRING_LITERAL:
             return "TOKEN_STRING_LITERAL";
+
+        case TOKEN_CHAR_LITERAL:
+            return "TOKEN_CHAR_LITERAL";
 
         case TOKEN_EOF:
             return "TOKEN_EOF";
