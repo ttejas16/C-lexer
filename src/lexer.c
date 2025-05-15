@@ -222,8 +222,7 @@ Token *scan_alphabets(Lexer *lexer) {
     memset(token_value, '\0', MAX_ID_LEN);
 
     size_t start = lexer->position;
-    while (!isspace(lexer_peek(lexer)) && !is_seperator(lexer_peek(lexer)) &&
-           !is_terminating(lexer_peek(lexer)) && (isalpha(lexer_peek(lexer)) || lexer_peek(lexer) == '_')) {
+    while (isalpha(lexer_peek(lexer)) || lexer_peek(lexer) == '_' || isdigit(lexer_peek(lexer))) {
         lexer_advance(lexer);
     }
 
