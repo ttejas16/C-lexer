@@ -223,7 +223,7 @@ Token *scan_alphabets(Lexer *lexer) {
 
     size_t start = lexer->position;
     while (!isspace(lexer_peek(lexer)) && !is_seperator(lexer_peek(lexer)) &&
-           !is_terminating(lexer_peek(lexer)) && isalpha(lexer_peek(lexer))) {
+           !is_terminating(lexer_peek(lexer)) && (isalpha(lexer_peek(lexer)) || lexer_peek(lexer) == '_')) {
         lexer_advance(lexer);
     }
 
@@ -325,10 +325,6 @@ Token *lexer_scan(Lexer *lexer) {
 
         case '/':
             token = create_token(lexer, TOKEN_FORWARDSLASH, "/");
-            break;
-
-        case '_':
-            token = create_token(lexer, TOKEN_UNDERSCORE, "_");
             break;
 
         case '|':
@@ -472,9 +468,7 @@ Token *lexer_scan(Lexer *lexer) {
         lexer_advance(lexer);
 
     }
-    
-    else if (token == NULL && isalpha(lexer_peek(lexer))) {
-        // printf("%d",MAX_ID_LEN);
+    else if (token == NULL && (isalpha(lexer_peek(lexer)) || lexer_peek(lexer) == '_')) {
         token = scan_alphabets(lexer);
     } 
     else if (token == NULL && isdigit(lexer_peek(lexer))) {
@@ -541,9 +535,6 @@ const char *get_token_name(TokenType type) {
 
         case TOKEN_FORWARDSLASH:
             return "TOKEN_FORWARDSLASH";
-
-        case TOKEN_UNDERSCORE:
-            return "TOKEN_UNDERSCORE";
 
         case TOKEN_PIPE:
             return "TOKEN_PIPE";
