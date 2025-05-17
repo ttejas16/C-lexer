@@ -249,7 +249,7 @@ Token *scan_numbers(Lexer *lexer) {
 
     size_t start = lexer->position;
     while (!isspace(lexer_peek(lexer)) && !is_seperator(lexer_peek(lexer)) &&
-           !is_terminating(lexer_peek(lexer)) && isdigit(lexer_peek(lexer))) {
+           !is_terminating(lexer_peek(lexer)) && isalnum(lexer_peek(lexer))) {
         lexer_advance(lexer);
     }
 
@@ -262,6 +262,52 @@ Token *scan_numbers(Lexer *lexer) {
 
     strncpy(token_value, &lexer->source[start], lexer->position - start);
     Token *token = create_token(lexer, TOKEN_NUMBER_LITERAL , token_value);
+
+    if (token_value[0] == '0')
+    {   
+        // TODO: add scanning for special number literals
+    }
+    else {
+
+        int suffix_start_index = strlen(token_value) - 1;
+        while (suffix_start_index > -1 && isalpha(token_value[suffix_start_index])) {
+            suffix_start_index--;
+        }
+        suffix_start_index++;
+
+        for (int i = 0; i < suffix_start_index; i++) {
+            if (isalpha(token_value[i]))
+            {
+                fprintf(stderr, 
+                    "Invalid character '%c' in number literal on line %lu, col %lu\n", 
+                    token_value[i], token->line, token->col);
+                exit(EXIT_FAILURE);
+            }
+        }
+
+        if (suffix_start_index < (int)strlen(token_value))
+        {
+            char *valid_suffix[] = { "f","u","l","ul","ll","ull",NULL };
+            char **p = valid_suffix;
+            while (*p) {
+                if (strcmp(*p, &token_value[suffix_start_index]) == 0) {
+                    break;
+                }
+
+                p++;
+            }
+
+            if (*p == NULL)
+            {
+                fprintf(stderr, 
+                    "Invalid suffix '%s' in number literal on line %lu, col %lu\n", 
+                    &token_value[suffix_start_index], token->line, token->col);
+                exit(EXIT_FAILURE);
+            }
+        }
+        
+    }
+    
     return token;
 }
 
