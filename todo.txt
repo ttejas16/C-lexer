@@ -1,0 +1,2 @@
+replace strncpy
+add tests maybe
