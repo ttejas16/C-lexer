@@ -248,8 +248,7 @@ Token *scan_numbers(Lexer *lexer) {
     memset(token_value, '\0', MAX_ID_LEN);
 
     size_t start = lexer->position;
-    while (!isspace(lexer_peek(lexer)) && !is_seperator(lexer_peek(lexer)) &&
-           !is_terminating(lexer_peek(lexer)) && isalnum(lexer_peek(lexer))) {
+    while (isalnum(lexer_peek(lexer)) || lexer_peek(lexer) == '.') {
         lexer_advance(lexer);
     }
 
@@ -263,9 +262,55 @@ Token *scan_numbers(Lexer *lexer) {
     strncpy(token_value, &lexer->source[start], lexer->position - start);
     Token *token = create_token(lexer, TOKEN_NUMBER_LITERAL , token_value);
 
-    if (token_value[0] == '0')
-    {   
-        // TODO: add scanning for special number literals
+    // validate hex, binary and octal literals 
+    if (strstr(token_value, ".") == NULL && token_value[0] == '0' && strlen(token_value) >= 2) {
+           
+        if (strlen(token_value) == 2 && isalpha(token_value[1])) {
+            fprintf(stderr, 
+                    "Invalid suffix '%c' in number literal on line %lu, col %lu\n", 
+                    token_value[1], token->line, token->col);
+            exit(EXIT_FAILURE);
+        }
+        
+        switch (token_value[1])
+        {
+        case 'x':
+        case 'X':
+            for (size_t i = 2; i < strlen(token_value); i++) {
+                if (tolower(token_value[i]) < 97 || tolower(token_value[i]) > 102) {
+                    fprintf(stderr, 
+                        "Invalid character '%c' in hex literal on line %lu, col %lu\n", 
+                        token_value[i], token->line, token->col);
+                    exit(EXIT_FAILURE);
+                }
+            }
+            
+            break;
+
+        case 'b':
+        case 'B':
+            for (size_t i = 2; i < strlen(token_value); i++) {
+                if (token_value[i] != '0' && token_value[i] != '1') {
+                    fprintf(stderr, 
+                        "Invalid character '%c' in binary literal on line %lu, col %lu\n", 
+                        token_value[i], token->line, token->col);
+                    exit(EXIT_FAILURE);
+                }
+            }
+
+            break;
+        
+        default:
+            for (size_t i = 1; i < strlen(token_value); i++) {
+                if (token_value[i] < 48 || token_value[i] > 55) {
+                    fprintf(stderr, 
+                        "Invalid character '%c' in octal literal on line %lu, col %lu\n", 
+                        token_value[i], token->line, token->col);
+                    exit(EXIT_FAILURE);
+                }
+            }
+            break;
+        }
     }
     else {
 
