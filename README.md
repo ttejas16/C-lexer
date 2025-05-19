@@ -142,7 +142,6 @@ Similar method is used for character literals apart from checking the length of 
 Only supports 
  * Hex (without floating point), binary and octal literals.
  * Normal literals like `1234` with valid suffixes like `f`, `l`, etc.
- * Floating point literals.
 
 Start scanning number literal if first character is a digit. <br/>
 ```C
