@@ -2,7 +2,7 @@
 void main(int argc, char **argv){
     printf("hello world");
 
-    if ('11')
+    if (1)
     {
         printf("hi");
     }
@@ -10,8 +10,5 @@ void main(int argc, char **argv){
         printf("bye");
     }
 
-    int a = 100;
-    float f = 1.00f;
-
-    for (int i = 0;i < 10;i++);
+    int a = 0xff;
 }

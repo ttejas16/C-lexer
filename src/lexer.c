@@ -272,12 +272,15 @@ Token *scan_numbers(Lexer *lexer) {
             exit(EXIT_FAILURE);
         }
         
+        // for hex check if all characters are 0-9, a-f from the third character
+        // for binary 0 or 1
+        // for octal 0-7
         switch (token_value[1])
         {
         case 'x':
         case 'X':
             for (size_t i = 2; i < strlen(token_value); i++) {
-                if (tolower(token_value[i]) < 97 || tolower(token_value[i]) > 102) {
+                if (!isdigit(token_value[i]) && (tolower(token_value[i]) < 97 || tolower(token_value[i]) > 102)) {
                     fprintf(stderr, 
                         "Invalid character '%c' in hex literal on line %lu, col %lu\n", 
                         token_value[i], token->line, token->col);
@@ -314,12 +317,15 @@ Token *scan_numbers(Lexer *lexer) {
     }
     else {
 
+        // scan from the end of string for alphabets
         int suffix_start_index = strlen(token_value) - 1;
         while (suffix_start_index > -1 && isalpha(token_value[suffix_start_index])) {
             suffix_start_index--;
         }
         suffix_start_index++;
 
+        // then loop until the first suffix character and check if 
+        // any alphabets appear before it and report an error
         for (int i = 0; i < suffix_start_index; i++) {
             if (isalpha(token_value[i]))
             {
@@ -363,7 +369,6 @@ Token *lexer_scan(Lexer *lexer) {
 
     Token *token = NULL;
 
-    // printf("[%c]", lexer_peek(lexer));
     switch (lexer_peek(lexer)) {
         case '{':
             token = create_token(lexer, TOKEN_L_CURLY_BRACE, "{");
