@@ -11,4 +11,6 @@ void main(int argc, char **argv){
     }
 
     int a = 0xff;
-}
+
+    // hi int
+} int f;// hi

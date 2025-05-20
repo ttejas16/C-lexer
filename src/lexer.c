@@ -370,6 +370,23 @@ Token *lexer_scan(Lexer *lexer) {
     Token *token = NULL;
 
     switch (lexer_peek(lexer)) {
+        case '/':
+            int look_ahead = lexer->position + 1;
+            if (look_ahead < 1024 && lexer->source[look_ahead] == '/')
+            {
+                while (!is_terminating(lexer_peek(lexer)))
+                {
+                    lexer_advance(lexer);
+                }
+
+                return NULL;
+            }
+            else {
+                token = create_token(lexer, TOKEN_FORWARDSLASH, "/");
+            }
+            
+            break;
+
         case '{':
             token = create_token(lexer, TOKEN_L_CURLY_BRACE, "{");
             break;
@@ -416,10 +433,6 @@ Token *lexer_scan(Lexer *lexer) {
 
         case '*':
             token = create_token(lexer, TOKEN_ASTERISK, "*");
-            break;
-
-        case '/':
-            token = create_token(lexer, TOKEN_FORWARDSLASH, "/");
             break;
 
         case '|':
