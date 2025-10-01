@@ -45,5 +45,10 @@ int main(int argc, char **argv) {
     print_tokens(&lexer);
 
     lexer_cleanup(&lexer);
+    if (fp != NULL)
+    {
+        fclose(fp);
+    }
+    
     return 0;
 }
